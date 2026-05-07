@@ -21,6 +21,9 @@ namespace SortingPrototype.Presentation
         private readonly List<PieceView> _spawnedPieces = new();
         private Action<int> _clickHandler;
         private int _branchIndex;
+        private bool _isSelected;
+        private int _highlightStartIndex = -1;
+        private int _highlightEndIndex = -1;
 
         public void Initialize(int branchIndex, Action<int> clickHandler)
         {
@@ -34,30 +37,33 @@ namespace SortingPrototype.Presentation
         {
             EnsureReferences();
             EnsurePieceCount(pieces.Count);
+            UpdateHighlightRange(pieces);
 
             for (var index = 0; index < _spawnedPieces.Count; index++)
             {
                 var isActive = index < pieces.Count;
-                _spawnedPieces[index].gameObject.SetActive(isActive);
+                var pieceView = _spawnedPieces[index];
+                pieceView.gameObject.SetActive(isActive);
+                pieceView.SetSelected(_isSelected && IsHighlightedPiece(index));
                 if (!isActive)
                 {
                     continue;
                 }
 
-                _spawnedPieces[index].transform.localPosition = GetPieceLocalPosition(index);
-                _spawnedPieces[index].SetColor(colorResolver.Invoke(pieces[index]));
+                pieceView.transform.localPosition = GetPieceLocalPosition(index);
+                pieceView.SetColor(colorResolver.Invoke(pieces[index]));
             }
         }
 
         public void SetSelected(bool isSelected)
         {
-            EnsureReferences();
-            if (highlightRenderer == null)
+            _isSelected = isSelected;
+            if (highlightRenderer != null)
             {
-                return;
+                highlightRenderer.gameObject.SetActive(false);
             }
 
-            highlightRenderer.gameObject.SetActive(isSelected);
+            UpdatePieceSelectionVisuals();
         }
 
         private void OnMouseDown()
@@ -104,6 +110,42 @@ namespace SortingPrototype.Presentation
         private bool ShouldMirrorLayout()
         {
             return mirrorLayoutOnRightSide && transform.position.x > 0f;
+        }
+
+        private void UpdatePieceSelectionVisuals()
+        {
+            for (var index = 0; index < _spawnedPieces.Count; index++)
+            {
+                _spawnedPieces[index].SetSelected(_isSelected && IsHighlightedPiece(index));
+            }
+        }
+
+        private void UpdateHighlightRange(IReadOnlyList<PieceColorId> pieces)
+        {
+            _highlightStartIndex = -1;
+            _highlightEndIndex = -1;
+            if (pieces.Count == 0)
+            {
+                return;
+            }
+
+            var topColor = pieces[pieces.Count - 1];
+            _highlightEndIndex = pieces.Count - 1;
+            _highlightStartIndex = _highlightEndIndex;
+            for (var index = _highlightEndIndex - 1; index >= 0; index--)
+            {
+                if (pieces[index] != topColor)
+                {
+                    break;
+                }
+
+                _highlightStartIndex = index;
+            }
+        }
+
+        private bool IsHighlightedPiece(int pieceIndex)
+        {
+            return pieceIndex >= _highlightStartIndex && pieceIndex <= _highlightEndIndex;
         }
 
         private void EnsurePieceCount(int targetCount)
