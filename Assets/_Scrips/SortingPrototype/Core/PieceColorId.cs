@@ -10,6 +10,8 @@ namespace SortingPrototype.Core
         Green = 3,
         Yellow = 4,
         Purple = 5,
-        Orange = 6
+        Orange = 6,
+        Pink = 7,
+        Cyan = 8
     }
 }

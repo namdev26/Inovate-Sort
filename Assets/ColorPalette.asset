@@ -22,3 +22,11 @@ MonoBehaviour:
     color: {r: 0.18534851, g: 1, b: 0, a: 1}
   - colorId: 4
     color: {r: 1, g: 0.9147354, b: 0, a: 1}
+  - colorId: 5
+    color: {r: 0.70718193, g: 0, b: 1, a: 1}
+  - colorId: 6
+    color: {r: 1, g: 0.3668547, b: 0, a: 1}
+  - colorId: 7
+    color: {r: 1, g: 0, b: 0.711823, a: 1}
+  - colorId: 8
+    color: {r: 0, g: 0.93726563, b: 1, a: 1}
