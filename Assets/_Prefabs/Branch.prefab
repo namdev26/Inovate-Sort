@@ -272,7 +272,7 @@ MonoBehaviour:
   pieceRoot: {fileID: 1414300691626243666}
   piecePrefab: {fileID: 6947369552232484508, guid: 77a08754cf30be44492af3e50486a16e, type: 3}
   maxSlotCount: 4
-  horizontalSpacing: 0.52
+  horizontalSpacing: 0.5
   mirrorLayoutOnRightSide: 1
 --- !u!1 &9211217330473989937
 GameObject:

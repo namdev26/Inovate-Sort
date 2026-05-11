@@ -68,7 +68,32 @@ namespace SortingPrototype.Presentation
 
         private void OnMouseDown()
         {
+            PlayClickFeedback();
             _clickHandler?.Invoke(_branchIndex);
+        }
+
+        private void PlayClickFeedback()
+        {
+            if (_highlightStartIndex < 0 || _highlightEndIndex < 0)
+            {
+                return;
+            }
+
+            for (var i = _highlightStartIndex; i <= _highlightEndIndex; i++)
+            {
+                if (i < 0 || i >= _spawnedPieces.Count)
+                {
+                    continue;
+                }
+
+                var piece = _spawnedPieces[i];
+                if (piece == null || !piece.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                piece.PlayPunch();
+            }
         }
 
         private void EnsureReferences()
