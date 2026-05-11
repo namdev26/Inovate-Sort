@@ -143,6 +143,8 @@ namespace SortingPrototype.Presentation
                 .Take(move.PieceCount)
                 .ToArray();
 
+            var isMovingWholePicture = IsWholePictureMove(move, movingTokens);
+
             var flyingPrefab = branchViews[move.SourceIndex].PiecePrefab;
             var flyers = new PieceView[movingTokens.Length];
             var from = new Vector3[movingTokens.Length];
@@ -157,8 +159,12 @@ namespace SortingPrototype.Presentation
 
                 var sourceSlot = sourceCount - movingTokens.Length + i;
                 var targetSlot = targetStartIndex + i;
-                from[i] = branchViews[move.SourceIndex].GetWorldPositionForSlot(sourceSlot);
-                to[i] = branchViews[move.TargetIndex].GetWorldPositionForSlot(targetSlot);
+                from[i] = branchViews[move.SourceIndex].IsAssembled
+                    ? branchViews[move.SourceIndex].GetWorldPositionForVariant(token.Variant)
+                    : branchViews[move.SourceIndex].GetWorldPositionForSlot(sourceSlot);
+                to[i] = isMovingWholePicture
+                    ? branchViews[move.TargetIndex].GetWorldPositionForVariant(token.Variant)
+                    : branchViews[move.TargetIndex].GetWorldPositionForSlot(targetSlot);
                 flyers[i].transform.position = from[i];
             }
 
@@ -188,6 +194,12 @@ namespace SortingPrototype.Presentation
 
             _boardState.ApplyMove(move);
             branchViews[move.SourceIndex].ClearTemporaryHiddenPieces();
+
+            if (isMovingWholePicture)
+            {
+                branchViews[move.TargetIndex].SetAssembled(true);
+            }
+
             RefreshBoard();
 
             if (_boardRules.IsSolved(_boardState))
@@ -197,6 +209,40 @@ namespace SortingPrototype.Presentation
 
             _moveRoutine = null;
             _inputLocked = false;
+        }
+
+        private static bool IsWholePictureMove(BoardMove move, PieceToken[] movingTokens)
+        {
+            if (move.PieceCount != BranchPictureCompletion.PictureWidth || movingTokens == null || movingTokens.Length != BranchPictureCompletion.PictureWidth)
+            {
+                return false;
+            }
+
+            var mask = 0;
+            var color = movingTokens[0].ColorId;
+            for (var i = 0; i < movingTokens.Length; i++)
+            {
+                if (movingTokens[i].ColorId != color)
+                {
+                    return false;
+                }
+
+                var v = movingTokens[i].Variant;
+                if (v < 0 || v >= BranchPictureCompletion.PictureWidth)
+                {
+                    return false;
+                }
+
+                var bit = 1 << v;
+                if ((mask & bit) != 0)
+                {
+                    return false;
+                }
+
+                mask |= bit;
+            }
+
+            return mask == 0b1111;
         }
 
         private void EnsureMoveAnimationRoot()

@@ -31,7 +31,13 @@ namespace SortingPrototype.Presentation
         private Coroutine _assembleRoutine;
         private int _temporarilyHiddenTopCount;
 
+        public bool IsAssembled => _isAssembled;
         public PieceView PiecePrefab => piecePrefab;
+
+        public void SetAssembled(bool isAssembled)
+        {
+            _isAssembled = isAssembled;
+        }
 
         public void Initialize(int branchIndex, Action<int> clickHandler)
         {
@@ -72,7 +78,7 @@ namespace SortingPrototype.Presentation
                 return;
             }
 
-            if (_isAssembled && pieces.Count == PictureWidth)
+            if (_isAssembled)
             {
                 ApplyAssembledLayout(pieces);
                 return;
@@ -194,6 +200,13 @@ namespace SortingPrototype.Presentation
             return pieceRoot != null ? pieceRoot.TransformPoint(local) : transform.TransformPoint(local);
         }
 
+        public Vector3 GetWorldPositionForVariant(int variant)
+        {
+            EnsureReferences();
+            var slotIndex = GetSlotIndexForVariant(variant);
+            return GetWorldPositionForSlot(slotIndex);
+        }
+
         public void PlayAssemble4x1(
             IReadOnlyList<PieceToken> pieces,
             Func<PieceToken, Sprite> spriteResolver,
@@ -240,8 +253,8 @@ namespace SortingPrototype.Presentation
                 .OrderBy(x => ShouldMirrorLayout() ? -x.variant : x.variant)
                 .ToArray();
 
-            var targets = GetAssembledLocalTargets(order.Length);
             var movers = order.Select(x => _spawnedPieces[x.index]).ToArray();
+            var targets = order.Select(x => GetPieceLocalPosition(GetSlotIndexForVariant(x.variant))).ToArray();
             var startPositions = movers.Select(p => p.transform.localPosition).ToArray();
 
             var duration = Mathf.Max(0.01f, durationSeconds);
@@ -271,28 +284,27 @@ namespace SortingPrototype.Presentation
 
         private void ApplyAssembledLayout(IReadOnlyList<PieceToken> pieces)
         {
-            var order = Enumerable
-                .Range(0, PictureWidth)
-                .Select(index => new { index, variant = pieces[index].Variant })
-                .OrderBy(x => ShouldMirrorLayout() ? -x.variant : x.variant)
-                .ToArray();
-
-            var targets = GetAssembledLocalTargets(order.Length);
-            for (var i = 0; i < order.Length; i++)
+            for (var i = 0; i < pieces.Count; i++)
             {
-                _spawnedPieces[order[i].index].transform.localPosition = targets[i];
+                if (_temporarilyHiddenTopCount > 0 && i >= pieces.Count - _temporarilyHiddenTopCount)
+                {
+                    continue;
+                }
+
+                var slotIndex = GetSlotIndexForVariant(pieces[i].Variant);
+                _spawnedPieces[i].transform.localPosition = GetPieceLocalPosition(slotIndex);
             }
         }
 
-        private Vector3[] GetAssembledLocalTargets(int count)
+        private int GetSlotIndexForVariant(int variant)
         {
-            var targets = new Vector3[count];
-            for (var i = 0; i < count; i++)
+            var clamped = Mathf.Clamp(variant, 0, PictureWidth - 1);
+            if (!ShouldMirrorLayout())
             {
-                targets[i] = GetPieceLocalPosition(i);
+                return clamped;
             }
 
-            return targets;
+            return (PictureWidth - 1) - clamped;
         }
 
         private static float SmoothStep(float t)
