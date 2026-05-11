@@ -29,6 +29,9 @@ namespace SortingPrototype.Presentation
         private bool _layoutLocked;
         private bool _isAssembled;
         private Coroutine _assembleRoutine;
+        private int _temporarilyHiddenTopCount;
+
+        public PieceView PiecePrefab => piecePrefab;
 
         public void Initialize(int branchIndex, Action<int> clickHandler)
         {
@@ -49,6 +52,10 @@ namespace SortingPrototype.Presentation
             for (var index = 0; index < _spawnedPieces.Count; index++)
             {
                 var isActive = index < pieces.Count;
+                if (_temporarilyHiddenTopCount > 0 && index >= pieces.Count - _temporarilyHiddenTopCount)
+                {
+                    isActive = false;
+                }
                 var pieceView = _spawnedPieces[index];
                 pieceView.gameObject.SetActive(isActive);
                 pieceView.SetSelected(_isSelected && IsHighlightedPiece(index));
@@ -73,6 +80,10 @@ namespace SortingPrototype.Presentation
 
             for (var index = 0; index < pieces.Count; index++)
             {
+                if (_temporarilyHiddenTopCount > 0 && index >= pieces.Count - _temporarilyHiddenTopCount)
+                {
+                    continue;
+                }
                 _spawnedPieces[index].transform.localPosition = GetPieceLocalPosition(index);
             }
         }
@@ -103,6 +114,17 @@ namespace SortingPrototype.Presentation
             }
 
             _layoutLocked = false;
+            _temporarilyHiddenTopCount = 0;
+        }
+
+        public void HideTopPiecesTemporarily(int count)
+        {
+            _temporarilyHiddenTopCount = Mathf.Max(0, count);
+        }
+
+        public void ClearTemporaryHiddenPieces()
+        {
+            _temporarilyHiddenTopCount = 0;
         }
 
         private void PlayClickFeedback()
@@ -163,6 +185,13 @@ namespace SortingPrototype.Presentation
             }
 
             return new Vector3(positionX, 0f, 0f);
+        }
+
+        public Vector3 GetWorldPositionForSlot(int slotIndex)
+        {
+            EnsureReferences();
+            var local = GetPieceLocalPosition(slotIndex);
+            return pieceRoot != null ? pieceRoot.TransformPoint(local) : transform.TransformPoint(local);
         }
 
         public void PlayAssemble4x1(

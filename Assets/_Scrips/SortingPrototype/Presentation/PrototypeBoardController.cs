@@ -12,6 +12,8 @@ namespace SortingPrototype.Presentation
         [SerializeField] private SpritePalette spritePalette;
         [SerializeField] private BranchView[] branchViews = Array.Empty<BranchView>();
         [SerializeField, Min(0.01f)] private float assembleDurationSeconds = 0.35f;
+        [SerializeField, Min(0.01f)] private float moveDurationSeconds = 0.22f;
+        [SerializeField] private Transform moveAnimationRoot;
 
         private BoardState _boardState;
         private IBoardRules _boardRules;
@@ -19,6 +21,7 @@ namespace SortingPrototype.Presentation
         private bool[] _assembledBranches;
         private bool _inputLocked;
         private int _activeAssembleCount;
+        private Coroutine _moveRoutine;
 
         private void Awake()
         {
@@ -105,16 +108,107 @@ namespace SortingPrototype.Presentation
 
             if (_boardRules.TryCreateMove(_boardState, _selectedSourceIndex.Value, targetIndex, out var move))
             {
-                _boardState.ApplyMove(move);
+                StartMoveAnimation(move);
             }
 
             ClearSelection();
+        }
+
+        private void StartMoveAnimation(BoardMove move)
+        {
+            if (_moveRoutine != null)
+            {
+                StopCoroutine(_moveRoutine);
+                _moveRoutine = null;
+            }
+
+            EnsureMoveAnimationRoot();
+            _inputLocked = true;
+            _moveRoutine = StartCoroutine(PlayMoveRoutine(move));
+        }
+
+        private System.Collections.IEnumerator PlayMoveRoutine(BoardMove move)
+        {
+            var sourceBranch = _boardState.GetBranch(move.SourceIndex);
+            var targetBranch = _boardState.GetBranch(move.TargetIndex);
+
+            var sourceCount = sourceBranch.PieceCount;
+            var targetStartIndex = targetBranch.PieceCount;
+
+            branchViews[move.SourceIndex].HideTopPiecesTemporarily(move.PieceCount);
+            RefreshBoard();
+
+            var movingTokens = sourceBranch.Pieces
+                .Skip(Mathf.Max(0, sourceCount - move.PieceCount))
+                .Take(move.PieceCount)
+                .ToArray();
+
+            var flyingPrefab = branchViews[move.SourceIndex].PiecePrefab;
+            var flyers = new PieceView[movingTokens.Length];
+            var from = new Vector3[movingTokens.Length];
+            var to = new Vector3[movingTokens.Length];
+
+            for (var i = 0; i < movingTokens.Length; i++)
+            {
+                var token = movingTokens[i];
+                flyers[i] = Instantiate(flyingPrefab, moveAnimationRoot);
+                flyers[i].SetSelected(false);
+                flyers[i].SetSprite(spritePalette.GetSprite(token.ColorId, token.Variant));
+
+                var sourceSlot = sourceCount - movingTokens.Length + i;
+                var targetSlot = targetStartIndex + i;
+                from[i] = branchViews[move.SourceIndex].GetWorldPositionForSlot(sourceSlot);
+                to[i] = branchViews[move.TargetIndex].GetWorldPositionForSlot(targetSlot);
+                flyers[i].transform.position = from[i];
+            }
+
+            var duration = Mathf.Max(0.01f, moveDurationSeconds);
+            var t = 0f;
+            while (t < duration)
+            {
+                t += Time.unscaledDeltaTime;
+                var normalized = Mathf.Clamp01(t / duration);
+                var eased = normalized * normalized * (3f - 2f * normalized);
+                for (var i = 0; i < flyers.Length; i++)
+                {
+                    if (flyers[i] == null) continue;
+                    flyers[i].transform.position = Vector3.LerpUnclamped(from[i], to[i], eased);
+                }
+
+                yield return null;
+            }
+
+            for (var i = 0; i < flyers.Length; i++)
+            {
+                if (flyers[i] != null)
+                {
+                    Destroy(flyers[i].gameObject);
+                }
+            }
+
+            _boardState.ApplyMove(move);
+            branchViews[move.SourceIndex].ClearTemporaryHiddenPieces();
             RefreshBoard();
 
             if (_boardRules.IsSolved(_boardState))
             {
                 Debug.Log("Prototype solved.", this);
             }
+
+            _moveRoutine = null;
+            _inputLocked = false;
+        }
+
+        private void EnsureMoveAnimationRoot()
+        {
+            if (moveAnimationRoot != null)
+            {
+                return;
+            }
+
+            var go = new GameObject("MoveAnimationRoot");
+            go.transform.SetParent(transform, false);
+            moveAnimationRoot = go.transform;
         }
 
         private void RefreshBoard()
