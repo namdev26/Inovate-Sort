@@ -11,10 +11,14 @@ namespace SortingPrototype.Presentation
         [SerializeField] private PrototypeLevelDefinition levelDefinition;
         [SerializeField] private SpritePalette spritePalette;
         [SerializeField] private BranchView[] branchViews = Array.Empty<BranchView>();
+        [SerializeField, Min(0.01f)] private float assembleDurationSeconds = 0.35f;
 
         private BoardState _boardState;
         private IBoardRules _boardRules;
         private int? _selectedSourceIndex;
+        private bool[] _assembledBranches;
+        private bool _inputLocked;
+        private int _activeAssembleCount;
 
         private void Awake()
         {
@@ -22,6 +26,7 @@ namespace SortingPrototype.Presentation
             ValidateConfiguration();
             _boardRules = new StandardBoardRules();
             _boardState = BoardStateFactory.Create(levelDefinition);
+            _assembledBranches = new bool[_boardState.BranchCount];
             InitializeViews();
             RefreshBoard();
         }
@@ -30,6 +35,9 @@ namespace SortingPrototype.Presentation
         {
             _selectedSourceIndex = null;
             _boardState = BoardStateFactory.Create(levelDefinition);
+            _assembledBranches = new bool[_boardState.BranchCount];
+            _inputLocked = false;
+            _activeAssembleCount = 0;
             RefreshBoard();
         }
 
@@ -57,6 +65,11 @@ namespace SortingPrototype.Presentation
 
         private void HandleBranchClicked(int branchIndex)
         {
+            if (_inputLocked)
+            {
+                return;
+            }
+
             if (!_selectedSourceIndex.HasValue)
             {
                 TrySelectSource(branchIndex);
@@ -110,9 +123,46 @@ namespace SortingPrototype.Presentation
             {
                 var branch = _boardState.GetBranch(index);
                 branchViews[index].Render(branch.Pieces, token => spritePalette.GetSprite(token.ColorId, token.Variant));
+                TryAssembleBranchIfJustCompleted(index, branch);
             }
 
             UpdateSelectionVisuals();
+        }
+
+        private void TryAssembleBranchIfJustCompleted(int branchIndex, BranchState branch)
+        {
+            if (_assembledBranches == null || branchIndex < 0 || branchIndex >= _assembledBranches.Length)
+            {
+                return;
+            }
+
+            if (_assembledBranches[branchIndex])
+            {
+                return;
+            }
+
+            if (!BranchPictureCompletion.IsPicture4x1Complete(branch))
+            {
+                return;
+            }
+
+            _assembledBranches[branchIndex] = true;
+            _activeAssembleCount++;
+            _inputLocked = true;
+
+            var snapshot = branch.Pieces.ToArray();
+            branchViews[branchIndex].PlayAssemble4x1(
+                snapshot,
+                token => spritePalette.GetSprite(token.ColorId, token.Variant),
+                assembleDurationSeconds,
+                HandleAssembleCompleted
+            );
+        }
+
+        private void HandleAssembleCompleted()
+        {
+            _activeAssembleCount = Mathf.Max(0, _activeAssembleCount - 1);
+            _inputLocked = _activeAssembleCount > 0;
         }
 
         private void ClearSelection()

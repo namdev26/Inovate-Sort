@@ -127,6 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 830666848}
     m_Modifications:
+    - target: {fileID: 2396550693169397734, guid: a4512155ae8d264458bec6bb7fd3ecb4, type: 3}
+      propertyPath: horizontalSpacing
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8873945560194404687, guid: a4512155ae8d264458bec6bb7fd3ecb4, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.2
@@ -783,6 +787,7 @@ MonoBehaviour:
   - {fileID: 348110818}
   - {fileID: 971491064}
   - {fileID: 2045048633}
+  assembleDurationSeconds: 0.35
 --- !u!4 &543199814
 Transform:
   m_ObjectHideFlags: 0
