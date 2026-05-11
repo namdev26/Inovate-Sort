@@ -769,7 +769,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelDefinition: {fileID: 11400000, guid: 6555e438b8982d74285d5be26277538e, type: 2}
-  colorPalette: {fileID: 11400000, guid: 3ea0943bc861cc4438aad49f2a95e9d5, type: 2}
+  spritePalette: {fileID: 11400000, guid: bed037fa1bd0403459db560c5969f3fc, type: 2}
   branchViews:
   - {fileID: 1382284874}
   - {fileID: 2044388499}
@@ -1133,7 +1133,7 @@ Transform:
   m_GameObject: {fileID: 830666847}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

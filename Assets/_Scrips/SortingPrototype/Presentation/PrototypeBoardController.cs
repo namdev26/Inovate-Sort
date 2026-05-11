@@ -9,7 +9,7 @@ namespace SortingPrototype.Presentation
     public sealed class PrototypeBoardController : MonoBehaviour
     {
         [SerializeField] private PrototypeLevelDefinition levelDefinition;
-        [SerializeField] private ColorPalette colorPalette;
+        [SerializeField] private SpritePalette spritePalette;
         [SerializeField] private BranchView[] branchViews = Array.Empty<BranchView>();
 
         private BoardState _boardState;
@@ -109,7 +109,7 @@ namespace SortingPrototype.Presentation
             for (var index = 0; index < branchViews.Length; index++)
             {
                 var branch = _boardState.GetBranch(index);
-                branchViews[index].Render(branch.Pieces, colorPalette.GetColor);
+                branchViews[index].Render(branch.Pieces, token => spritePalette.GetSprite(token.ColorId, token.Variant));
             }
 
             UpdateSelectionVisuals();
@@ -136,9 +136,9 @@ namespace SortingPrototype.Presentation
                 throw new InvalidOperationException("PrototypeBoardController requires a level definition.");
             }
 
-            if (colorPalette == null)
+            if (spritePalette == null)
             {
-                throw new InvalidOperationException("PrototypeBoardController requires a color palette.");
+                throw new InvalidOperationException("PrototypeBoardController requires a sprite palette.");
             }
 
             if (branchViews == null || branchViews.Length == 0)

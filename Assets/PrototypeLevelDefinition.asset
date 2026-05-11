@@ -14,15 +14,91 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   branchCapacity: 4
   branches:
-  - pieces: 01000000060000000300000008000000
-  - pieces: 06000000030000000100000002000000
-  - pieces: 03000000040000000800000003000000
-  - pieces: 06000000040000000500000008000000
-  - pieces: 05000000070000000400000007000000
-  - pieces: 02000000040000000100000005000000
-  - pieces: 05000000060000000100000008000000
-  - pieces: 02000000070000000200000007000000
-  - pieces: 
-  - pieces: 
-  - pieces: 
-  - pieces: 
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 7
+      variant: 2
+    - colorId: 1
+      variant: 1
+    - colorId: 2
+      variant: 3
+    - colorId: 6
+      variant: 1
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 3
+      variant: 0
+    - colorId: 1
+      variant: 2
+    - colorId: 8
+      variant: 2
+    - colorId: 3
+      variant: 3
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 4
+      variant: 1
+    - colorId: 3
+      variant: 2
+    - colorId: 8
+      variant: 0
+    - colorId: 6
+      variant: 0
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 5
+      variant: 0
+    - colorId: 4
+      variant: 0
+    - colorId: 5
+      variant: 1
+    - colorId: 4
+      variant: 2
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 5
+      variant: 2
+    - colorId: 5
+      variant: 3
+    - colorId: 1
+      variant: 0
+    - colorId: 4
+      variant: 3
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 2
+      variant: 1
+    - colorId: 6
+      variant: 2
+    - colorId: 8
+      variant: 3
+    - colorId: 8
+      variant: 1
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 2
+      variant: 0
+    - colorId: 7
+      variant: 0
+    - colorId: 7
+      variant: 1
+    - colorId: 6
+      variant: 3
+  - legacyColorIds: 
+    pieceTokens:
+    - colorId: 7
+      variant: 3
+    - colorId: 3
+      variant: 1
+    - colorId: 1
+      variant: 3
+    - colorId: 2
+      variant: 2
+  - legacyColorIds: 
+    pieceTokens: []
+  - legacyColorIds: 
+    pieceTokens: []
+  - legacyColorIds: 
+    pieceTokens: []
+  - legacyColorIds: 
+    pieceTokens: []

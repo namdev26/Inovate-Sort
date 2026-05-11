@@ -33,7 +33,7 @@ namespace SortingPrototype.Presentation
             _clickHandler = clickHandler;
         }
 
-        public void Render(IReadOnlyList<PieceColorId> pieces, Func<PieceColorId, Color> colorResolver)
+        public void Render(IReadOnlyList<PieceToken> pieces, Func<PieceToken, Sprite> spriteResolver)
         {
             EnsureReferences();
             EnsurePieceCount(pieces.Count);
@@ -51,7 +51,7 @@ namespace SortingPrototype.Presentation
                 }
 
                 pieceView.transform.localPosition = GetPieceLocalPosition(index);
-                pieceView.SetColor(colorResolver.Invoke(pieces[index]));
+                pieceView.SetSprite(spriteResolver.Invoke(pieces[index]));
             }
         }
 
@@ -120,7 +120,7 @@ namespace SortingPrototype.Presentation
             }
         }
 
-        private void UpdateHighlightRange(IReadOnlyList<PieceColorId> pieces)
+        private void UpdateHighlightRange(IReadOnlyList<PieceToken> pieces)
         {
             _highlightStartIndex = -1;
             _highlightEndIndex = -1;
@@ -129,12 +129,12 @@ namespace SortingPrototype.Presentation
                 return;
             }
 
-            var topColor = pieces[pieces.Count - 1];
+            var topColor = pieces[pieces.Count - 1].ColorId;
             _highlightEndIndex = pieces.Count - 1;
             _highlightStartIndex = _highlightEndIndex;
             for (var index = _highlightEndIndex - 1; index >= 0; index--)
             {
-                if (pieces[index] != topColor)
+                if (pieces[index].ColorId != topColor)
                 {
                     break;
                 }

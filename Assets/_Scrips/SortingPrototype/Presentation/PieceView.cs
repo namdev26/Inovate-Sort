@@ -7,14 +7,15 @@ namespace SortingPrototype.Presentation
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private SpriteRenderer outlineRenderer;
 
-        public void SetColor(Color color)
+        public void SetSprite(Sprite sprite)
         {
             if (spriteRenderer == null)
             {
                 return;
             }
 
-            spriteRenderer.color = color;
+            spriteRenderer.sprite = sprite;
+            spriteRenderer.color = Color.white;
         }
 
         public void SetSelected(bool isSelected)

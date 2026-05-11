@@ -6,9 +6,9 @@ namespace SortingPrototype.Core
     [Serializable]
     public sealed class BranchState
     {
-        private readonly List<PieceColorId> _pieces;
+        private readonly List<PieceToken> _pieces;
 
-        public BranchState(int capacity, IEnumerable<PieceColorId> initialPieces)
+        public BranchState(int capacity, IEnumerable<PieceToken> initialPieces)
         {
             if (capacity <= 0)
             {
@@ -16,7 +16,7 @@ namespace SortingPrototype.Core
             }
 
             Capacity = capacity;
-            _pieces = initialPieces == null ? new List<PieceColorId>(capacity) : new List<PieceColorId>(initialPieces);
+            _pieces = initialPieces == null ? new List<PieceToken>(capacity) : new List<PieceToken>(initialPieces);
 
             if (_pieces.Count > capacity)
             {
@@ -29,7 +29,7 @@ namespace SortingPrototype.Core
         public int AvailableSlots => Capacity - PieceCount;
         public bool IsEmpty => PieceCount == 0;
         public bool IsFull => PieceCount >= Capacity;
-        public IReadOnlyList<PieceColorId> Pieces => _pieces;
+        public IReadOnlyList<PieceToken> Pieces => _pieces;
 
         public bool TryGetTopColor(out PieceColorId colorId)
         {
@@ -39,7 +39,7 @@ namespace SortingPrototype.Core
                 return false;
             }
 
-            colorId = _pieces[PieceCount - 1];
+            colorId = _pieces[PieceCount - 1].ColorId;
             return true;
         }
 
@@ -53,7 +53,7 @@ namespace SortingPrototype.Core
             var count = 0;
             for (var index = PieceCount - 1; index >= 0; index--)
             {
-                if (_pieces[index] != topColor)
+                if (_pieces[index].ColorId != topColor)
                 {
                     break;
                 }
@@ -73,7 +73,7 @@ namespace SortingPrototype.Core
 
             for (var index = 0; index < _pieces.Count; index++)
             {
-                if (_pieces[index] != topColor)
+                if (_pieces[index].ColorId != topColor)
                 {
                     return false;
                 }
@@ -82,7 +82,7 @@ namespace SortingPrototype.Core
             return true;
         }
 
-        public IReadOnlyList<PieceColorId> PopTopPieces(int pieceCount)
+        public IReadOnlyList<PieceToken> PopTopPieces(int pieceCount)
         {
             ValidateRemoval(pieceCount);
 
@@ -92,7 +92,7 @@ namespace SortingPrototype.Core
             return removedPieces;
         }
 
-        public void PushPieces(IEnumerable<PieceColorId> pieces)
+        public void PushPieces(IEnumerable<PieceToken> pieces)
         {
             if (pieces == null)
             {
